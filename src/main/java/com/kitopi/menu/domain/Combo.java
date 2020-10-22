@@ -22,7 +22,7 @@ public class Combo {
 
     private BigDecimal price;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<DishesGroup> dishesGroup;
 
 }
