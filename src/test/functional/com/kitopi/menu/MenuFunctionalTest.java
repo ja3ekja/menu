@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = MenuApplication.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class DishIntegrationTest {
+public class MenuFunctionalTest {
 
     @LocalServerPort
     private int port;
@@ -40,10 +40,10 @@ public class DishIntegrationTest {
         //When
         combo.setDescription(newDescription);
         restTemplate.postForObject(uri, new HttpEntity(combo), ComboDTO.class);
-        ComboDTO updatedCombo = restTemplate.getForObject(uri + "/2", ComboDTO.class);
+        ComboDTO updatedCombo = restTemplate.getForObject(uri + "/1", ComboDTO.class);
 
         //Then
-        assertNotEquals(oldDescription, updatedCombo.getDescription());
+        assertNotEquals(updatedCombo.getDescription(), oldDescription);
         assertThat(updatedCombo.getDescription(), is(newDescription));
     }
 
