@@ -4,7 +4,10 @@ import com.kitopi.menu.domain.Dish;
 import com.kitopi.menu.domain.dto.DishDTO;
 import com.kitopi.menu.mapper.DishMapper;
 import com.kitopi.menu.repository.DishRepository;
-import org.junit.jupiter.api.BeforeEach;
+import io.github.benas.randombeans.EnhancedRandomBuilder;
+import io.github.benas.randombeans.api.EnhancedRandom;
+import io.vavr.control.Option;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
@@ -12,22 +15,22 @@ import org.modelmapper.ModelMapper;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class DishServiceTest {
 
-    private DishRepository repository;
-    private DishService service;
-    private DishMapper dishMapper;
-    private ModelMapper modelMapper;
+    private static DishRepository repository;
+    private static DishService service;
 
 
-    @BeforeEach
-    public void init() {
+    @BeforeAll
+    public static void init() {
         repository = mock(DishRepository.class);
-        modelMapper = new ModelMapper();
-        dishMapper = new DishMapper(modelMapper);
+        ModelMapper modelMapper = new ModelMapper();
+        DishMapper dishMapper = new DishMapper(modelMapper);
         service = new DishService(dishMapper, repository);
     }
 
@@ -35,27 +38,31 @@ class DishServiceTest {
     @DisplayName("This is test to verify getting dish from mocked DB")
     public void getDishTest() {
         //Given
-        DishDTO mockedDish = createDTO();
+        EnhancedRandom randomGenerator = EnhancedRandomBuilder.aNewEnhancedRandomBuilder().build();
+        Dish mockedDish = randomGenerator.nextObject(Dish.class);
+        Long mockedDishId = mockedDish.getId();
+
         //When
-        when(repository.findById(5L)).thenReturn(createOptionalDAO());
-//        when().thenReturn();
+        when(repository.findById(mockedDishId)).thenReturn(Optional.of(mockedDish));
+
+        DishDTO dish = service.getDish(mockedDishId).get();
+
         //Then
-        DishDTO dish = service.getDish(5L);
-        assertEquals(dish, mockedDish);
+        assertEquals(dish.getId(), mockedDish.getId());
+        assertEquals(dish.getName(), mockedDish.getName());
+        assertEquals(dish.getDescription(), mockedDish.getDescription());
+        assertEquals(dish.getPrice(), mockedDish.getPrice());
     }
 
-    private DishDTO createDTO() {
-        DishDTO dto = new DishDTO();
-        dto.setId(5L);
-        dto.setName("Cheese burger");
-        return dto;
-    }
 
-    private Optional<Dish> createOptionalDAO() {
-        Dish dto = new Dish();
-        dto.setId(5L);
-        dto.setName("Cheese burger");
-        return Optional.of(dto);
-    }
+    @Test
+    @DisplayName("This is test to verify return empty Optional from dB")
+    public void getNonExistingDishTest() {
+        //When
+        when(repository.findById(any())).thenReturn(Optional.empty());
+        Option<DishDTO> dish = service.getDish(1L);
 
+        //Then
+        assertTrue(dish.isEmpty());
+    }
 }

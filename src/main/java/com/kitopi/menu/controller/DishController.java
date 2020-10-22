@@ -5,7 +5,9 @@ import com.kitopi.menu.service.DishService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -21,7 +23,10 @@ public class DishController {
     @RequestMapping("/{dishId}")
     public DishDTO getDish(@PathVariable Long dishId) {
         log.info("Return dish information for id: {} .", dishId);
-        return service.getDish(dishId);
+        return service.getDish(dishId).getOrElseThrow(() -> {
+            log.warn("Dish with id {} not found", dishId);
+            return new ResponseStatusException(HttpStatus.NOT_FOUND, "Dish with id " + dishId + " not found");
+        });
     }
 
     @GetMapping

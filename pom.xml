@@ -69,6 +69,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>io.github.benas</groupId>
+            <artifactId>random-beans</artifactId>
+            <version>3.9.0</version>
+        </dependency>
     </dependencies>
 
     <build>
